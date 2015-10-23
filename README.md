@@ -22,5 +22,4 @@ sudo chmod +x add-apt-repository
 
 sudo chown root:root add-apt-repository
 
-Ps. I found a version of this tool on a forum, but it used full 'apt-get update' to get the authentication key. that seemed like a waste of bandwidth and time, so I edited it to only pull keys for the added repository ~and voila~.
-
+Ps. I found a version of this tool on a forum, but it used full 'apt-get update' to get the authentication key. that seemed like a waste of bandwidth and time, so I edited it to only pull keys for the added repository.
