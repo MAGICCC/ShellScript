@@ -14,7 +14,7 @@ then
     ppa_local=`echo "$1" | cut -d":" -f2 -s | cut -d"/" -f1 -s`
     echo "deb http://ppa.launchpad.net/$ppa_name/ubuntu trusty main" >> /etc/apt/sources.list.d/${ppa_local}.list
     apt-get update -o Dir::Etc::sourcelist="sources.list.d/${ppa_local}.list" -o Dir::Etc::sourceparts="-" -o APT::Get::List-Cleanup="0"  >> /dev/null 2> /tmp/${NAME}_apt_add_key.txt
-key=`cat /tmp/${NAME}_apt_add_key.txt | cut -d":" -f6 | cut -d" " -f3`
+    key=`cat /tmp/${NAME}_apt_add_key.txt | cut -d":" -f6 | cut -d" " -f3`
     apt-key adv --keyserver keyserver.ubuntu.com --recv-keys $key
     rm -rf /tmp/${NAME}_apt_add_key.txt
   fi
