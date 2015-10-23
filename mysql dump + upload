@@ -1,0 +1,48 @@
+#!/bin/bash
+# TARGET: Backup-Target
+# IGNORE: List with ignores DBs (separate with |)
+# CONF: MySQL configfile, which contains the login data
+TARGET=/root
+IGNORE="phpmyadmin|mysql|information_schema|performance_schema"
+CONF=/etc/mysql/debian.cnf
+if [ ! -r $CONF ]; then /usr/bin/logger "$0 - we are not able to access $CONF"; exit 1; fi
+if [ ! -d $TARGET ] || [ ! -w $TARGET ]; then /usr/bin/logger "$0 - Backupfolder not writeable"; exit 1; fi
+ 
+DBS="$(/usr/bin/mysql --defaults-extra-file=$CONF -Bse 'show databases' | /bin/grep -Ev $IGNORE)"
+NOW=$(date +"%Y-%m-%d-%R")
+ 
+for DB in $DBS; do
+    /usr/bin/mysqldump --defaults-extra-file=$CONF --skip-extended-insert --skip-comments $DB > $TARGET/$DB.sql
+done
+ 
+if [ -x /usr/bin/bzr ] && [ -d ${TARGET}/.bzr/branch ]; then
+  cd $TARGET
+  /usr/bin/bzr add .
+  /usr/bin/bzr commit -m "$NOW"
+else
+  /usr/bin/logger "$0 - bzr not available or backup folder not available"
+fi
+ 
+/usr/bin/logger "$0 - Dump successful!"
+ 
+BACKUPHOST="host"
+BACKUPUSER="user"
+BACKUPPASS="password"
+BACKUPDIR="./backups"
+BACKUPFILE="$NOW.zip"
+ 
+ 
+echo "[$NOW] Databases dumped!"
+cd $TARGET
+echo "[$NOW] Zipping folder..."
+zip -rv -9 $BACKUPFILE *.sql
+echo "[$NOW] Zipping done!"
+echo "[$NOW] Uploading file..."
+ncftpput -u $BACKUPUSER -p $BACKUPPASS $BACKUPHOST $BACKUPDIR $BACKUPFILE
+echo "[$NOW] Uploading done!"
+echo "[$NOW] Cleaning up..."
+rm -v $BACKUPFILE
+rm -v *.sql
+echo "[$NOW] Cleanup done!"
+echo "[$NOW] Backup done!"
+exit 0
